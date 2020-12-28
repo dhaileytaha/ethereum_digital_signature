@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Assessment</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdn.rawgit.com/ethereum/web3.js/develop/dist/web3.js"></script>
+
+</head>
+<body>
+
+<div class="container">
+  <h2>Bank Registeration Form</h2>
+  <form action="">
+    <div class="f`-0orm-group">
+      <label for="fname">Full Name:</label>
+      <input type="text" class="form-control" id="fname" placeholder="Enter Full Name" name="fname">
+    </div>
+    <div class="form-group">
+      <label for="dob">Date of Birth:</label>
+      <input type="text" class="form-control" id="dob" placeholder="Enter Date of Birth" name="dob">
+    </div>
+    <div class="form-group">
+      <label for="account">Bank Account Number:</label>
+      <input type="number" class="form-control" id="account" placeholder="Enter Bank Account Number" name="account"><br>
+      <input type="text" class="form-control" id="addr" placeholder="address" name="addr">
+    </div>
+    <button type="button" class="btn btn-default" onclick="concatenate()">Submit</button>
+  </form>
+</div>
+<div class="row"> 
+	<div class="col-lg-12">
+	<!-- 	<p id="checkDetails"></p> -->
+	</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
+<script type="text/javascript">
+
+	co
+
+	console.log(web3); // {eth: .., shh: ...} // it's here!
+
+	web3.eth.defaultAccount = web3.eth.accounts[0];
+	// var balance = web3.eth.getBalance("0x00b9cf42cd2aa0f4361d3833575e8d9896ce4b43")
+	// console.log(balance);
+	// console.log(balance.toString(10));
+	//
+	console.log("addr = "+web3.eth.accounts[0]);
+
+	var bankContract = web3.eth.contract([{"constant":true,"inputs":[{"name":"_message","type":"bytes32"},{"name":"_v","type":"uint8"},{"name":"_r","type":"bytes32"},{"name":"_s","type":"bytes32"},{"name":"signer","type":"address"}],"name":"verify","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_address","type":"address"}],"name":"getDetails","outputs":[{"name":"","type":"uint256"},{"name":"","type":"string"},{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getCustomerAddr","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"customerSign","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"creator","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"bankAccountAddr","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_myAddress","type":"address"},{"name":"_accountNumber","type":"uint256"},{"name":"_fullName","type":"string"},{"name":"_dob","type":"string"}],"name":"storeDetails","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_signature","type":"string"},{"name":"_bankAccount","type":"uint256"}],"name":"storeSign","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]);
+
+
+	var contract = bankContract.at("0x59ca06146a12c1ec8778d7646611b9cd475d07f2");//
+
+	function toHex(str) {
+	 var hex = ''
+	 for(var i=0;i<str.length;i++) {
+	  hex += ''+str.charCodeAt(i).toString(16)
+	 }
+	 return hex
+	}
+
+
+	function concatenate(){
+
+	    contract.storeDetails($("#addr").val(), $("#account").val(), $("#fname").val(), $("#dob").val(), {from: web3.eth.accounts[0], gas:3000000});
+    
+   
+		var str1 = document.getElementById("fname").value;
+	    var str2 = document.getElementById("dob").value;
+	    var str3 = document.getElementById("account").value;
+	    let msg = str1.concat(str2, str3);
+		
+
+		console.log("message = "+msg);
+
+		var msgHash = web3.sha3(msg);
+
+		console.log("message hash = "+msgHash);
+		console.log("signer address = "+ $("#addr").val());
+		
+		var signature = web3.eth.sign($("#addr").val(), msgHash);
+
+		//console.log("address = "+addr);
+		console.log("signature = "+signature);
+
+
+		contract.storeSign(signature, $("#account").val(), {from: web3.eth.accounts[0], gas:3000000}, function(error, result){
+			if(!error){
+				console.log("success");
+				alert("Success");
+			} else {
+				console.log(error)
+			}
+		});
+		
+	}
+</script>
+
+</body>
+</html>

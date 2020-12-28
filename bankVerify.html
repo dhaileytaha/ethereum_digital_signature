@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Assessment</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdn.rawgit.com/ethereum/web3.js/develop/dist/web3.js"></script>
+
+</head>
+<body>
+
+<div class="container">
+  <h2>Bank Verification Form</h2>
+  <form action="">
+    <div class="f`-0orm-group">
+      <label for="fname">Enter Address:</label>
+      <input type="text" class="form-control" id="address" placeholder="Enter Address" name="fname">
+    </div><br>
+    <button type="button" class="btn btn-default" id="btnDetail">Get detail</button>
+    <h3>Details</h3>
+    <h3 id="getCustomerBankDetails"></h3>
+    <div class="form-group">
+      <label for="dob">Enter Bank Account Number:</label>
+      <input type="text" class="form-control" id="accNumber" placeholder="Enter Account Number" name="">
+    </div><br>
+    <button type="button" class="btn btn-default" id="getSign">Get Sign</button>
+
+    <h3>Signature</h3>
+    <p id="getSignature"></p>
+    <div class="form-group">
+      
+       </div>
+       <div class="col-lg-12 text-center">
+    		<button type="button" class="btn btn-default btn-lg" onclick="concatenate()">Verify Sign</button>
+    	</div>	
+  </form>
+</div>
+<div class="row"> 
+	<div class="col-lg-12">
+		<p id="checkDetails"></p>
+	</div>
+</div>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
+<script type="text/javascript">
+
+	if(typeof web3 != 'undefined'){
+		web = new Web(web3.currentProvider);
+	} else {
+		web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+	}
+
+	console.log(web3); // {eth: .., shh: ...} // it's here!
+
+	web3.eth.defaultAccount = web3.eth.accounts[0];
+	// var balance = web3.eth.getBalance("0x00b9cf42cd2aa0f4361d3833575e8d9896ce4b43")
+	// console.log(balance);
+	// console.log(balance.toString(10));
+	
+
+	var bankContract = web3.eth.contract([{"constant":true,"inputs":[{"name":"_message","type":"bytes32"},{"name":"_v","type":"uint8"},{"name":"_r","type":"bytes32"},{"name":"_s","type":"bytes32"},{"name":"signer","type":"address"}],"name":"verify","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_address","type":"address"}],"name":"getDetails","outputs":[{"name":"","type":"uint256"},{"name":"","type":"string"},{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"getCustomerAddr","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"customerSign","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"creator","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"bankAccountAddr","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_myAddress","type":"address"},{"name":"_accountNumber","type":"uint256"},{"name":"_fullName","type":"string"},{"name":"_dob","type":"string"}],"name":"storeDetails","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_signature","type":"string"},{"name":"_bankAccount","type":"uint256"}],"name":"storeSign","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}]);
+
+
+	var contract = bankContract.at("0x59ca06146a12c1ec8778d7646611b9cd475d07f2");
+
+	//console.log(contract);
+
+	function toHex(str) {
+	 var hex = ''
+	 for(var i=0;i<str.length;i++) {
+	  hex += ''+str.charCodeAt(i).toString(16)
+	 }
+	 return hex
+	}
+
+
+	function concatenate(){
+
+
+		var addr = $("#address").val();
+
+			// console.log($("#addr").val()+" "+$("#account").val()+" "+$("#fname").val()+" "+$("#dob").val());
+
+ 	    
+   
+		var str1 = $("#str1").val();
+	    var str2 = $("#str2").val();
+	    var str3 = $("#str3").val();
+	    let msg = str1.concat(str2, str3);
+		
+
+		console.log("message = "+msg);
+
+		var msgHash = web3.sha3(msg);
+
+		console.log("message hash = "+msgHash);
+		
+		var signature = web3.eth.sign(addr, msgHash);
+
+		//console.log("address = "+addr);
+		console.log("signature = "+signature);
+
+
+		var customerSign = $("#getSignature").html();
+
+		console.log(customerSign);
+
+
+	
+		var r = signature.slice(0, 66);
+		var s = '0x' + signature.slice(66, 130);
+		var v = '0x' + signature.slice(130, 132);
+		v = web3.toDecimal(v);
+		v = v + 27;
+		msg = msgHash;
+
+
+    	console.log("r = "+r);
+		console.log("s = "+s);
+		console.log("v = "+v);
+		console.log("msg = "+msg);
+
+
+		
+	contract.verify(msg, v, r, s, addr, {from: web3.eth.accounts[0], gas:3000000}, function(error, result){
+			if(!error){
+				console.log("result = "+result);
+				alert(result);
+			} else {
+				console.log(error);
+			}
+		})
+		
+
+	}
+	
+	$("#btnDetail").click(function(){
+		console.log("input address = "+$("#address").val());
+		contract.getDetails($("#address").val(), function(error, result){
+			if(!error){
+				console.log(result);
+				$("#getCustomerBankDetails").html("<p id='str3'>Account Number : "+result[0]+"</p><p id='str1'> Full Name : "+result[1]+"<p id='str3'> Date of Birth :"+result[2]+"</p>");
+			} else {
+				console.log(error);
+			}
+		});
+		});
+
+	$("#getSign").click(function(){
+		contract.customerSign.call($("#accNumber").val(), {from: web3.eth.accounts[0], gas:3000000}, function(error, result){
+			if(!error){
+				$("#getSignature").html(result);
+			} else {
+				console.log(error);
+			} 
+		})
+	})
+</script>
+
+</body>
+</html>

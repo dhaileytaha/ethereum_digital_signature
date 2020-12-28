@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+	<!-- jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+	<!-- Latest compiled JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+	<script type="text/javascript" src="https://cdn.rawgit.com/ethereum/web3.js/develop/dist/web3.js"></script>
+</head>
+<body>
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="col-lg-offset-3 col-lg-6">
+				<h1>Instructor Form</h1>
+				<form>
+				  <div class="form-group">
+				    <label>First Name</label>
+				    <input type="text" class="form-control" id="fname">
+				  </div>
+				  <div class="form-group">
+				    <label>Last Name</label>
+				    <input type="text" class="form-control" id="lname">
+				  </div>
+				  <div class="form-group">
+				    <label>Age:</label>
+				    <input type="number" class="form-control" id="age">
+				  </div>
+				  <div class="form-group">
+				    <label>Address:</label>
+				    <input type="text" class="form-control" id="address">
+				  </div>
+				  <button type="button" id="btn" class="btn btn-default">Submit</button>
+				</form>
+
+				<h1>Instructor Details</h1>
+				<form>
+					<div class="form-group">
+				    <label>Address:</label>
+				    <input type="text" class="form-control" id="address1">
+				  </div>
+				  <button type="button" id="sub" class="btn btn-default">Go</button>
+				</form>
+				<h3 id="details"></h3>
+				<h1>Instructor Addresses</h1>
+				<button type="button" id="go" class="btn btn-default">Go</button>
+				<h3 id="addrIns"></h3>
+				<h1>Instructor Count</h1>
+				<button type="button" id="go1" class="btn btn-default">Go</button>
+				<h3 id="addrInsCount"></h3>
+			</div>
+		</div>
+	</div>	
+	<script type="text/javascript">
+			
+			web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+		
+			console.log(web3); // {eth: .., shh: ...} // it's here!
+
+			var contract = web3.eth.contract([{"constant":false,"inputs":[{"name":"_fname","type":"string"},{"name":"_lname","type":"string"},{"name":"_age","type":"uint256"},{"name":"_address","type":"address"}],"name":"storeInstructor","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"constant":true,"inputs":[],"name":"countInstructors","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"creator","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"displayAddrs","outputs":[{"name":"","type":"address[]"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_address","type":"address"}],"name":"getInstructor","outputs":[{"name":"","type":"string"},{"name":"","type":"string"},{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"instructorAddrs","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"}]);
+
+			var instance = contract.at("0xa3fafe08f7b37cc568609c7318996877878fae0d");
+
+			web3.eth.defaultAccount = web3.eth.accounts[0];
+
+			$("#btn").click(function(){
+				instance.storeInstructor($("#fname").val(), $("#lname").val(), $("#age").val(), $("#address").val(), {from: web3.eth.defaultAccount, gas: 300000}, function(error, result){
+					if(!error){
+						alert("Success");
+					} else {
+						console.log(error);
+					}
+				})
+			})
+			$("#sub").click(function(){
+					instance.getInstructor($("#address1").val(), function(error, result){
+						if(!error){
+						$("#details").html("First Name :"+ result[0]+" Last Name :"+ result[1]+" Age : "+result
+							[2]);
+					} else {
+						console.log(error);
+					}
+
+				})				
+			})
+
+			$("#go").click(function(){
+				instance.displayAddrs(function(error, result){
+					if(!error){
+						$("#addrIns").html("Address :"+ result[0]+" "+result[1]+" "+result[2] );
+					} else {
+						console.log(error);
+					}
+				})
+			})
+			$("#go1").click(function(){
+				instance.countInstructors(function(error, result){
+					if(!error){
+						$("#addrInsCount").html("Total Instructors :"+ result );
+					} else {
+						console.log(error);
+					}
+				})
+			})
+			
+	</script>
+</body>
+</html>
